@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZMATHS Math Editor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.6/katex.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.6/katex.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-right: 2px solid #ddd;
+        }
+
+        .category {
+            margin-bottom: 20px;
+        }
+
+        button.math-symbol {
+            margin: 5px 0;
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            width: 100%;
+            text-align: left;
+        }
+
+        #editor {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+        }
+
+        #math-output {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #latex-input {
+            height: 120px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 100%;
+        }
+
+        #rendered-math {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        #metadata {
+            margin-top: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+
+        .input-group label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="sidebar">
+            <!-- Math Symbol Categories -->
+            <div class="category" id="fractions">
+                <h3>EZMATHS Beta 1.0 Made By Yinfan</h3>
+                <h3>分数与根号</h3>
+                <button class="math-symbol" onclick="insertMathSymbol('\\frac{a}{b}')">分数</button>
+                <button class="math-symbol" onclick="insertMathSymbol('\\sqrt{a}')">根号</button>
+            </div>
+            <div class="category" id="calculus">
+                <h3>微积分</h3>
+                <button class="math-symbol" onclick="insertMathSymbol('\\int_a^b f(x) dx')">积分</button>
+                <button class="math-symbol" onclick="insertMathSymbol('\\sum_{i=1}^{n} a_i')">求和</button>
+                <button class="math-symbol" onclick="insertMathSymbol('\\lim_{x\\to\\infty} f(x)')">极限</button>
+            </div>
+            <div class="category" id="algebra">
+                <h3>代数</h3>
+                <button class="math-symbol" onclick="insertMathSymbol('x^2 + y^2 = z^2')">平方</button>
+                <button class="math-symbol" onclick="insertMathSymbol('\\sqrt{a+b}')">根号</button>
+                <button class="math-symbol" onclick="insertMathSymbol('\\newline')">换行</button>
+            </div>
+            <div class="category" id="geometry">
+                <h3>几何</h3>
+                <button class="math-symbol" onclick="insertMathSymbol('\\overrightarrow{AB}')">向量</button>
+                <button class="math-symbol" onclick="insertMathSymbol('\\angle ABC')">角度</button>
+            </div>
+        </div>
+
+        <div id="editor">
+            <!-- Toolbar with Save, Load, and Metadata -->
+            <div id="toolbar">
+                <button id="save-btn">保存</button>
+                <button id="load-btn">加载</button>
+                <button id="clear-btn">清除</button>
+            </div>
+
+            <div id="metadata">
+                <div class="input-group">
+                    <label for="title">标题：</label>
+                    <input type="text" id="title" placeholder="文档标题" />
+                </div>
+                <div class="input-group">
+                    <label for="author">作者：</label>
+                    <input type="text" id="author" placeholder="作者" />
+                </div>
+                <div class="input-group">
+                    <label for="date">日期：</label>
+                    <input type="text" id="date" placeholder="日期" value="2024-11-20" />
+                </div>
+            </div>
+
+            <!-- LaTeX input and rendered output -->
+            <div id="math-output">
+                <textarea id="latex-input" placeholder="请输入LaTeX公式..."></textarea>
+                <div id="rendered-math"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Insert math symbols into the LaTeX input
+        function insertMathSymbol(symbol) {
+            let input = document.getElementById("latex-input");
+            input.value += symbol;
+            renderMath(input.value);
+        }
+
+        // Render LaTeX input into visual output
+        function renderMath(latex) {
+            let output = document.getElementById("rendered-math");
+            output.innerHTML = '';
+            try {
+                katex.render(latex, output);
+            } catch (error) {
+                output.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Re-render the LaTeX input as user types
+        document.getElementById("latex-input").addEventListener("input", function() {
+            let latex = this.value;
+            renderMath(latex);
+        });
+
+        // Save document as .ezdf format
+        document.getElementById("save-btn").addEventListener("click", function() {
+            let latexContent = document.getElementById("latex-input").value;
+            let title = document.getElementById("title").value || "未命名文档";
+            let author = document.getElementById("author").value || "未知作者";
+            let date = document.getElementById("date").value || new Date().toLocaleDateString();
+
+            let jsonContent = {
+                "content": latexContent,
+                "metadata": {
+                    "title": title,
+                    "author": author,
+                    "date": date
+                }
+            };
+            
+            let blob = new Blob([JSON.stringify(jsonContent)], { type: "application/json" });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = title + ".ezdf";
+            link.click();
+        });
+
+        // Load .ezdf file
+        document.getElementById("load-btn").addEventListener("click", function() {
+            let fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = ".ezdf";
+            fileInput.addEventListener("change", function(e) {
+                let file = e.target.files[0];
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function(event) {
+                        let data = JSON.parse(event.target.result);
+                        document.getElementById("latex-input").value = data.content;
+                        renderMath(data.content);
+                        document.getElementById("title").value = data.metadata.title;
+                        document.getElementById("author").value = data.metadata.author;
+                        document.getElementById("date").value = data.metadata.date;
+                    };
+                    reader.readAsText(file);
+                }
+            });
+            fileInput.click();
+        });
+
+        // Clear the editor
+        document.getElementById("clear-btn").addEventListener("click", function() {
+            document.getElementById("latex-input").value = '';
+            document.getElementById("rendered-math").innerHTML = '';
+            document.getElementById("title").value = '';
+            document.getElementById("author").value = '';
+            document.getElementById("date").value = '2024-11-20';
+        });
+    </script>
+</body>
+</html>
