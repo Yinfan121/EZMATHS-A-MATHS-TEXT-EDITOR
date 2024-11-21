@@ -1,7 +1,6 @@
 ![logo](doc-resources/logo.png "logo")
 
 汉语
-&nbsp;&nbsp;| &nbsp;&nbsp;
 
 ##
 
